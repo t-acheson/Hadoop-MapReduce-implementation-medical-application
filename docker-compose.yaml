@@ -1,0 +1,24 @@
+version: '3'
+services:
+  namenode:
+    image: my-hadoop:3.3.6
+    ports:
+      - "50070:50070"  # NameNode web UI
+    volumes:
+      - namenode-data:/hadoop/dfs/name
+    environment:
+      - HDFS_NAMENODE_USER=hadoop
+      - HDFS_DATANODE_USER=hadoop
+
+  datanode:
+    image: my-hadoop:3.3.6
+    ports:
+      - "50075:50075"  # DataNode web UI
+    volumes:
+      - datanode-data:/hadoop/dfs/data
+    environment:
+      - HDFS_DATANODE_USER=hadoop
+
+volumes:
+  namenode-data:
+  datanode-data:

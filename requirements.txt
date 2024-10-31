@@ -1,0 +1,6 @@
+Flask
+matplotlib
+plotly
+mrjob  # For MapReduce in Python
+pandas
+requests
