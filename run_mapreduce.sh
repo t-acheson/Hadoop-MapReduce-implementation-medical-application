@@ -102,9 +102,18 @@ echo "Verifying dataset in HDFS..."
 docker exec namenode /bin/bash -c "hdfs dfs -ls /heart_data"
 
 # Step 9: Copy MapReduce scripts to HDFS
-echo "Copying MapReduce scripts to HDFS..."
-docker exec namenode /bin/bash -c "hdfs dfs -put -f ${APP_DIR}/mapper.py /heart_data/"
-docker exec namenode /bin/bash -c "hdfs dfs -put -f ${APP_DIR}/reducer.py /heart_data/"
+# Verify paths of scripts before copying
+echo "Mapper Path: ${APP_DIR}/mapper.py"
+echo "Reducer Path: ${APP_DIR}/reducer.py"
+
+# Ensure the MapReduce scripts are available inside the container first
+docker cp ${APP_DIR}/mapper.py namenode:/heart_data/mapper.py
+docker cp ${APP_DIR}/reducer.py namenode:/heart_data/reducer.py
+
+# Then copy them into HDFS
+docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/mapper.py /heart_data/"
+docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/reducer.py /heart_data/"
+
 
 # Step 10: Ensure script files exist in HDFS before running
 echo "Ensuring mapper and reducer scripts are available in HDFS..."
