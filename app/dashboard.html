@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heart Disease Dashboard</title>
+</head>
+<body>
+    <div id="dashboard"></div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        // Fetch data from the API
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                // Process data for visualization
+                let ageBuckets = [];
+                let cholBuckets = [];
+                let percentages = [];
+                let heartDiseaseCases = [];
+
+                data.forEach(item => {
+                    ageBuckets.push(item.age_bucket);
+                    cholBuckets.push(item.chol_bucket);
+                    percentages.push(item.percentage);
+                    heartDiseaseCases.push(item.heart_disease);
+                });
+
+                // Create a bar chart for heart disease percentages
+                const trace1 = {
+                    x: ageBuckets.map((age, i) => `${age} / ${cholBuckets[i]}`),
+                    y: percentages,
+                    type: 'bar',
+                    name: 'Heart Disease %',
+                    marker: { color: 'red' }
+                };
+
+                // Create a bar chart for heart disease cases
+                const trace2 = {
+                    x: ageBuckets.map((age, i) => `${age} / ${cholBuckets[i]}`),
+                    y: heartDiseaseCases,
+                    type: 'bar',
+                    name: 'Heart Disease Cases',
+                    marker: { color: 'blue' }
+                };
+
+                const layout = {
+                    title: 'Heart Disease Analysis by Age and Cholesterol',
+                    xaxis: { title: 'Age/Cholesterol Cluster' },
+                    yaxis: { title: 'Count / Percentage' },
+                    barmode: 'group'
+                };
+
+                Plotly.newPlot('dashboard', [trace1, trace2], layout);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>
