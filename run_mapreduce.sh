@@ -120,6 +120,19 @@ echo "Ensuring mapper and reducer scripts are available in HDFS..."
 docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/mapper.py /heart_data/ || true"
 docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/reducer.py /heart_data/ || true"
 
+# deletign output dir if it already exists
+echo "Checking if /heart_data_output directory exists in HDFS..."
+DIR_EXISTS=$(docker exec namenode /bin/bash -c "hdfs dfs -test -d /heart_data_output && echo 'exists' || echo 'does not exist'")
+
+if [ "$DIR_EXISTS" == "exists" ]; then
+    echo "/heart_data_output directory exists. Removing it..."
+    docker exec namenode /bin/bash -c "hdfs dfs -rm -r /heart_data_output"
+    echo "/heart_data_output directory removed from HDFS."
+else
+    echo "/heart_data_output directory does not exist in HDFS."
+fi
+
+
 # Step 11: Run MapReduce job
 echo "Running Hadoop Streaming job..."
 docker exec namenode /bin/bash -c "hadoop jar /opt/hadoop-3.2.1/share/hadoop/tools/lib/hadoop-streaming-3.2.1.jar \
