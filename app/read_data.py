@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load the dataset
-file_path = './heart_disease_data.csv'  
+file_path = 'data/heart_disease.csv'  
 data = pd.read_csv(file_path)
 
 # Define age and cholesterol ranges
