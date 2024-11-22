@@ -5,7 +5,7 @@ PROJECT_ROOT="$(dirname "$(realpath "$0")")"
 
 # Paths
 DOCKER_HADOOP_DIR="${PROJECT_ROOT}/docker-hadoop"
-DATA_FILE="./preprocessed_heart_disease_data.csv"
+DATA_FILE="${PROJECT_ROOT}/preprocessed_heart_disease_data.csv"
 
 APP_DIR="${PROJECT_ROOT}/app"
 OUTPUT_DIR="${PROJECT_ROOT}/output"
@@ -61,48 +61,57 @@ if [[ "$SAFE_MODE_STATUS" == *"ON"* ]]; then
     echo "HDFS has exited Safe Mode."
 fi
 
-# Step 5: Ensure /heart_data directory exists
-echo "Ensuring /heart_data directory exists..."
-docker exec namenode /bin/bash -c "hdfs dfs -mkdir -p /heart_data"
+# Step 5: Ensure /heart_data directory exists in HDFS
+echo "Checking if /heart_data directory exists in HDFS..."
+DIR_EXISTS=$(docker exec namenode /bin/bash -c "hdfs dfs -test -d /heart_data && echo 'exists' || echo 'does not exist'")
 
-# Step 6: Ensure HDFS directories are correctly created
-echo "Ensuring required HDFS directories are created..."
-docker exec namenode /bin/bash -c "hdfs dfs -mkdir -p /heart_data_output"
-
-# Step 7: Copy dataset to HDFS
-echo "Copying dataset to HDFS..."
-docker cp ${DATA_FILE} namenode:/heart_data/
-docker exec namenode /bin/bash -c "ls /heart_data" # Check if the file exists in the container
-
-# Retry logic for copying dataset if directory is not ready
-for i in {1..10}; do
-    docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/preprocessed_heart_disease_data.csv /heart_data/"
-    if [ $? -eq 0 ]; then
-        echo "Dataset copied to HDFS."
-        break
-    else
-        echo "Error: Dataset copy failed, retrying..."
-        sleep 5
-    fi
-done
-
-# Check if the dataset was successfully copied
-if [ $i -eq 10 ]; then
-    echo "Error: Failed to copy dataset to HDFS after 10 attempts. Exiting."
-    exit 1
+if [ "$DIR_EXISTS" == "exists" ]; then
+    echo "/heart_data directory already exists in HDFS."
+else
+    echo "/heart_data directory does not exist. Creating it..."
+    docker exec namenode /bin/bash -c "hdfs dfs -mkdir -p /heart_data"
+    echo "/heart_data directory created in HDFS."
 fi
 
-# Step 8: Copy MapReduce scripts
-echo "Copying MapReduce scripts to Namenode..."
-docker cp ${APP_DIR}/mapper.py namenode:/heart_data/
-docker cp ${APP_DIR}/reducer.py namenode:/heart_data/
+# Step 6: Ensure /heart_data_output directory exists in HDFS
+echo "Checking if /heart_data_output directory exists in HDFS..."
+DIR_EXISTS=$(docker exec namenode /bin/bash -c "hdfs dfs -test -d /heart_data_output && echo 'exists' || echo 'does not exist'")
 
-# Step 9: Ensure script files exist in HDFS before running
+if [ "$DIR_EXISTS" == "exists" ]; then
+    echo "/heart_data_output directory already exists in HDFS."
+else
+    echo "/heart_data_output directory does not exist. Creating it..."
+    docker exec namenode /bin/bash -c "hdfs dfs -mkdir -p /heart_data_output"
+    echo "/heart_data_output directory created in HDFS."
+fi
+
+# Step 7: Ensure the dataset is available in the container's local filesystem
+echo "Copying dataset to /heart_data directory inside the container..."
+docker cp ${DATA_FILE} namenode:/heart_data/preprocessed_heart_disease_data.csv
+
+# Verify if the file exists in the container
+echo "Verifying dataset in the container's local filesystem..."
+docker exec namenode /bin/bash -c "ls /heart_data/preprocessed_heart_disease_data.csv"
+
+# Step 8: Copy dataset to HDFS directly
+echo "Copying dataset to HDFS..."
+docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/preprocessed_heart_disease_data.csv /heart_data/"
+
+# Verify if the file is in HDFS
+echo "Verifying dataset in HDFS..."
+docker exec namenode /bin/bash -c "hdfs dfs -ls /heart_data"
+
+# Step 9: Copy MapReduce scripts to HDFS
+echo "Copying MapReduce scripts to HDFS..."
+docker exec namenode /bin/bash -c "hdfs dfs -put -f ${APP_DIR}/mapper.py /heart_data/"
+docker exec namenode /bin/bash -c "hdfs dfs -put -f ${APP_DIR}/reducer.py /heart_data/"
+
+# Step 10: Ensure script files exist in HDFS before running
 echo "Ensuring mapper and reducer scripts are available in HDFS..."
 docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/mapper.py /heart_data/ || true"
 docker exec namenode /bin/bash -c "hdfs dfs -put -f /heart_data/reducer.py /heart_data/ || true"
 
-# Step 10: Run MapReduce job
+# Step 11: Run MapReduce job
 echo "Running Hadoop Streaming job..."
 docker exec namenode /bin/bash -c "hadoop jar /opt/hadoop-3.2.1/share/hadoop/tools/lib/hadoop-streaming-3.2.1.jar \
     -input /heart_data/preprocessed_heart_disease_data.csv \
@@ -117,7 +126,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 11: Retrieve output
+# Step 12: Retrieve output from HDFS
 echo "Retrieving MapReduce job output..."
 mkdir -p ${OUTPUT_DIR}
 docker exec namenode /bin/bash -c "hdfs dfs -cat /heart_data_output/part-00000" > ${MAPREDUCE_OUTPUT}
@@ -127,5 +136,5 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 12: Final status
+# Step 13: Final status
 echo "MapReduce job complete. Results saved in ${MAPREDUCE_OUTPUT}"
