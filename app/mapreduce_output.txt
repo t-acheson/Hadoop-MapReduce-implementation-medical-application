@@ -1,0 +1,9 @@
+20-40,201-239	Total: 18, Heart Disease: 4, Percentage: 22.22%
+20-40,240+	Total: 39, Heart Disease: 12, Percentage: 30.77%
+20-40,<=200	Total: 36, Heart Disease: 16, Percentage: 44.44%
+41-60,201-239	Total: 164, Heart Disease: 72, Percentage: 43.90%
+41-60,240+	Total: 258, Heart Disease: 126, Percentage: 48.84%
+41-60,<=200	Total: 184, Heart Disease: 118, Percentage: 64.13%
+61+,201-239	Total: 45, Heart Disease: 29, Percentage: 64.44%
+61+,240+	Total: 92, Heart Disease: 64, Percentage: 69.57%
+61+,<=200	Total: 84, Heart Disease: 68, Percentage: 80.95%
