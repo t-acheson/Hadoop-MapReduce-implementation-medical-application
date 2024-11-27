@@ -157,5 +157,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 13: Final status
+
+#  Run Flask app (outside the Docker container)
+echo "Starting Flask app..."
+echo "Running Flask app locally..."
+python3 ${APP_DIR}/app.py &
+echo "Flask app started. You can access it at http://localhost:5001"
 echo "MapReduce job complete. Results saved in ${MAPREDUCE_OUTPUT}"
