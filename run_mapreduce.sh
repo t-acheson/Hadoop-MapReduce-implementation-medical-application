@@ -6,7 +6,6 @@ PROJECT_ROOT="$(dirname "$(realpath "$0")")"
 # Paths
 DOCKER_HADOOP_DIR="${PROJECT_ROOT}/docker-hadoop"
 DATA_FILE="${PROJECT_ROOT}/preprocessed_heart_disease_data.csv"
-
 APP_DIR="${PROJECT_ROOT}/app"
 OUTPUT_DIR="${PROJECT_ROOT}/output"
 MAPREDUCE_OUTPUT="${OUTPUT_DIR}/mapreduce_results.csv"
