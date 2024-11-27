@@ -4,96 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heart Disease Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css">
+    <style>
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highest-risk {
+            background-color: lightpink;
+            font-weight: bold;
+        }
+        .job-status {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Heart Disease Dashboard</h1>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Age & Chol Bucket</th>
-                        <th>Total Patients</th>
-                        <th>Heart Disease Cases</th>
-                        <th>Percentage</th>
-                    </tr>
-                </thead>
-                <tbody id="data-table">
-                    <!-- Data will be populated here by JavaScript -->
-                </tbody>
-            </table>
-        </div>
+    <h1 style="text-align: center;">Heart Disease Dashboard</h1>
+    
+    <!-- Display job status -->
+    <div class="job-status">
+        <h2>MapReduce Job Status: <strong>{{ job_status }}</strong></h2>
     </div>
 
-    <script>
-        // Fetch data from the Flask API and populate the table
-        fetch('/api/data')
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.getElementById('data-table');
-                data.forEach(row => {
-                    const tableRow = document.createElement('tr');
-                    tableRow.innerHTML = `
-                        <td>${row.age_chol_bucket}</td>
-                        <td>${row.total_patients}</td>
-                        <td>${row.heart_disease_count}</td>
-                        <td>${row.percentage.toFixed(2)}%</td>
-                    `;
-                    tableBody.appendChild(tableRow);
-                });
-            })
-            .catch(error => console.error('Error fetching data:', error));
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MapReduce Job Dashboard</title>
-</head>
-<body>
-    <h1>MapReduce Job Dashboard</h1>
-    <table border="1">
+    <table>
         <thead>
             <tr>
-                <th>Job Name</th>
-                <th>Job ID</th>
-                <th>Status</th>
-                <th>Tracking URL</th>
+                <th>Age & Chol Bucket</th>
+                <th>Total Patients</th>
+                <th>Heart Disease Cases</th>
+                <th>Percentage</th>
             </tr>
         </thead>
-        <tbody id="job-table-body">
-            <!-- Jobs will be dynamically inserted here -->
+        <tbody>
+            {% for entry in results %}
+                <tr class="{% if entry.age_chol_bucket == highest_risk %}highest-risk{% endif %}">
+                    <td>{{ entry.age_chol_bucket }}</td>
+                    <td>{{ entry.total_patients }}</td>
+                    <td>{{ entry.heart_disease_count }}</td>
+                    <td>{{ entry.percentage }}%</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 
-    <script>
-        // Fetch job data from the Flask API
-        fetch('/api/jobs')
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('job-table-body');
-                data.forEach(job => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${job.name}</td>
-                        <td>${job.id}</td>
-                        <td>${job.state}</td>
-                        <td><a href="${job.tracking_url}" target="_blank">View Job</a></td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching jobs:', error);
-            });
-    </script>
+    <h2 style="text-align: center;">Group with Highest Risk of Heart Disease</h2>
+    <p style="text-align: center; font-size: 20px;">
+        <strong>{{ highest_risk }}</strong> with a risk of <strong>{{ highest_percentage }}%</strong>.
+    </p>
 </body>
-</html> -->
+</html>
