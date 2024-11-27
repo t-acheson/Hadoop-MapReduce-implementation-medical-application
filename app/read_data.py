@@ -1,33 +1,25 @@
 import pandas as pd
 
 # Load the dataset
-file_path = 'data/heart_disease.csv'  
+file_path = 'heart_disease.csv'  
 data = pd.read_csv(file_path)
 
 # Define age and cholesterol ranges
 def define_age_bucket(age):
-    if 20 <= age <= 30:
-        return '20-30'
-    elif 31 <= age <= 40:
-        return '31-40'
-    elif 41 <= age <= 50:
-        return '41-50'
-    elif 51 <= age <= 60:
-        return '51-60'
-    elif 61 <= age <= 70:
-        return '61-70'
+    if 20 <= age <= 40:
+        return '20-40'
+    elif 41 <= age <= 60:
+        return '41-60'
     else:
-        return '71+'
+        return '61+'
 
 def define_chol_bucket(chol):
-    if 100 <= chol <= 199:
-        return '100-199'
-    elif 200 <= chol <= 239:
-        return '200-239'
-    elif 240 <= chol <= 279:
-        return '240-279'
+    if chol <= 200:
+        return '<=200'
+    elif 201 <= chol <= 239:
+        return '201-239'
     else:
-        return '280+'
+        return '240+'
 
 # Apply the bucket definitions
 data['age_bucket'] = data['age'].apply(define_age_bucket)

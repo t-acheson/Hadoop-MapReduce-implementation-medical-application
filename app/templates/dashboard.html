@@ -3,6 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Heart Disease Dashboard</h1>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Age & Chol Bucket</th>
+                        <th>Total Patients</th>
+                        <th>Heart Disease Cases</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table">
+                    <!-- Data will be populated here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Fetch data from the Flask API and populate the table
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('data-table');
+                data.forEach(row => {
+                    const tableRow = document.createElement('tr');
+                    tableRow.innerHTML = `
+                        <td>${row.age_chol_bucket}</td>
+                        <td>${row.total_patients}</td>
+                        <td>${row.heart_disease_count}</td>
+                        <td>${row.percentage.toFixed(2)}%</td>
+                    `;
+                    tableBody.appendChild(tableRow);
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MapReduce Job Dashboard</title>
 </head>
 <body>
@@ -43,4 +96,4 @@
             });
     </script>
 </body>
-</html>
+</html> -->
