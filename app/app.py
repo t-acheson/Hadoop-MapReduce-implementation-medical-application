@@ -1,42 +1,89 @@
 from flask import Flask, jsonify, render_template
-import pandas as pd
+import requests
+import json
 
 app = Flask(__name__)
 
-# Load MapReduce output
-RESULT_FILE = 'mapreduce_results.csv'  # TODO Replace with your actual file path
+#TODO  YARN ResourceManager URL (make sure this is correct)
+YARN_RESOURCE_MANAGER_URL = 'http://localhost:8088/ws/v1/cluster/apps'  # This is the YARN API endpoint
 
 @app.route('/api/data')
 def get_data():
-    # Load the results file into a DataFrame
-    data = pd.read_csv(RESULT_FILE, sep="\t", header=None)
-    data.columns = ['Cluster', 'Summary']
+    # Query the YARN ResourceManager API to get job status
+    try:
+        response = requests.get(YARN_RESOURCE_MANAGER_URL)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        apps = response.json().get('apps', {}).get('app', [])
 
-    # Prepare data for visualization
-    results = []
-    for _, row in data.iterrows():
-        cluster = row['Cluster']
-        summary = row['Summary']
+        job_status = []
+        for app in apps:
+            app_name = app.get('name')
+            app_id = app.get('id')
+            app_state = app.get('state')
+            app_tracking_url = app.get('trackingUrl', 'N/A')
 
-        # Extract cluster and values
-        age_bucket, chol_bucket = cluster.split(',')
-        total = int(summary.split(',')[0].split(':')[1].strip())
-        heart_disease = int(summary.split(',')[1].split(':')[1].strip())
-        percentage = float(summary.split(',')[2].split(':')[1].strip().replace('%', ''))
+            job_status.append({
+                'app_name': app_name,
+                'app_id': app_id,
+                'app_state': app_state,
+                'tracking_url': app_tracking_url
+            })
 
-        results.append({
-            'age_bucket': age_bucket,
-            'chol_bucket': chol_bucket,
-            'total': total,
-            'heart_disease': heart_disease,
-            'percentage': percentage
-        })
-    
-    return jsonify(results)
+        return jsonify(job_status)
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/')
 def index():
     return render_template('dashboard.html')  # Serve the dashboard page
 
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+# from flask import Flask, jsonify, render_template
+# import pandas as pd
+
+# app = Flask(__name__)
+
+# # Load MapReduce output
+# RESULT_FILE = 'mapreduce_results.csv'  # TODO Replace with actual file path
+
+# @app.route('/api/data')
+# def get_data():
+#     # Load the results file into a DataFrame
+#     data = pd.read_csv(RESULT_FILE, sep="\t", header=None)
+#     data.columns = ['Cluster', 'Summary']
+
+#     # Prepare data for visualization
+#     results = []
+#     for _, row in data.iterrows():
+#         cluster = row['Cluster']
+#         summary = row['Summary']
+
+#         # Extract cluster and values
+#         age_bucket, chol_bucket = cluster.split(',')
+#         total = int(summary.split(',')[0].split(':')[1].strip())
+#         heart_disease = int(summary.split(',')[1].split(':')[1].strip())
+#         percentage = float(summary.split(',')[2].split(':')[1].strip().replace('%', ''))
+
+#         results.append({
+#             'age_bucket': age_bucket,
+#             'chol_bucket': chol_bucket,
+#             'total': total,
+#             'heart_disease': heart_disease,
+#             'percentage': percentage
+#         })
+    
+#     return jsonify(results)
+
+# @app.route('/')
+# def index():
+#     return render_template('dashboard.html')  # Serve the dashboard page
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
