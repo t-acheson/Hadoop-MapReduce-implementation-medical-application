@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapReduce Job Dashboard</title>
+</head>
+<body>
+    <h1>MapReduce Job Dashboard</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Job Name</th>
+                <th>Job ID</th>
+                <th>Status</th>
+                <th>Tracking URL</th>
+            </tr>
+        </thead>
+        <tbody id="job-table-body">
+            <!-- Jobs will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch job data from the Flask API
+        fetch('/api/jobs')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('job-table-body');
+                data.forEach(job => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${job.name}</td>
+                        <td>${job.id}</td>
+                        <td>${job.state}</td>
+                        <td><a href="${job.tracking_url}" target="_blank">View Job</a></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching jobs:', error);
+            });
+    </script>
+</body>
+</html>

@@ -4,14 +4,13 @@ import json
 
 app = Flask(__name__)
 
-#TODO  YARN ResourceManager URL (make sure this is correct)
-YARN_RESOURCE_MANAGER_URL = 'http://localhost:8088/ws/v1/cluster/apps'  # This is the YARN API endpoint
+# Ensure this points to your Docker container network
+YARN_API_BASE = "http://resourcemanager:8088/ws/v1/cluster"  # Docker container name
 
 @app.route('/api/data')
 def get_data():
-    # Query the YARN ResourceManager API to get job status
     try:
-        response = requests.get(YARN_RESOURCE_MANAGER_URL)
+        response = requests.get(f"{YARN_API_BASE}/apps")
         response.raise_for_status()  # Raise an exception for HTTP errors
         apps = response.json().get('apps', {}).get('app', [])
 
@@ -41,8 +40,7 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run(host='0.0.0.0', port=5001, debug=True)
 
 
 # from flask import Flask, jsonify, render_template
