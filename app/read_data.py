@@ -25,7 +25,7 @@ def define_chol_bucket(chol):
 data['age_bucket'] = data['age'].apply(define_age_bucket)
 data['chol_bucket'] = data['chol'].apply(define_chol_bucket)
 
-# Keep only the necessary columns
+# Keep the necessary columns
 data_preprocessed = data[['id', 'age', 'age_bucket', 'chol', 'chol_bucket', 'num']]
 
 # Map 'num' to binary heart disease presence (1 if disease is present, 0 if absent)

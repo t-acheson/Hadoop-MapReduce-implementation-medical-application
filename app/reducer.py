@@ -10,13 +10,11 @@ def reducer():
     for line in sys.stdin:
         line = line.strip()
         
-        if not line:  # Skip empty lines
+        if not line:
             continue
         
-        # Split key and value from the tab-separated input
+        # Split key and value from the tab-separated input, turn val into int
         key, value = line.split("\t")
-        
-        # Cast the value into an integer
         value = int(value)
         
         # When the key changes, process the previous bucket
